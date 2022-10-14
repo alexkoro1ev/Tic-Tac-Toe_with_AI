@@ -1,19 +1,33 @@
-package tictactoe;
+package tictactoe.mode.player;
 
-public class Human extends Player implements MoveMaking {
-    public static final PlayerLabel LABEL = PlayerLabel.HUMAN;
+import tictactoe.controller.Controller;
+import tictactoe.model.Cell;
+import tictactoe.util.Console;
+
+public class Human extends Player {
 
     public Human(Controller controller) {
         super(controller);
     }
 
     @Override
-    public Move makeMove() {
+    public Cell makeMove() {
         int y;
         int x;
         char label = controller.getLabel();
+ //       char opponentsLabel = label == 'X' ? 'O' : 'X';
         while (true) {
             try {
+//                Cell last = lastMoveToWin(label);
+//                if (last.getY() != -1) {
+//                    Console.writeLine("Preferred: " + (last.getY() + 1) + " " + (last.getX() + 1));
+//                }
+//                Cell opponentsMoveForWinning = lastMoveToWin(opponentsLabel);
+//                if (opponentsMoveForWinning.getY() != -1) {
+//                    Console.writeLine("Opp is gonna win, if he moves at: " +
+//                            (opponentsMoveForWinning.getY() + 1) + " " + (opponentsMoveForWinning.getX() + 1));
+//                }
+
                 Console.write("Enter the coordinates: ");
                 String coordinates = Console.readLine();
                 y = Integer.parseInt(String.valueOf(coordinates.charAt(0))) - 1;
@@ -23,7 +37,10 @@ public class Human extends Player implements MoveMaking {
                 continue;
             }
 
-            Move move = new Move(label, y, x);
+            // inspection line
+
+
+            Cell move = new Cell(y, x, label);
             if (moveIsNotValid(move)) {
                 continue;
             }
@@ -33,7 +50,7 @@ public class Human extends Player implements MoveMaking {
     }
 
     @Override
-    protected boolean moveIsNotValid(Move move) {
+    protected boolean moveIsNotValid(Cell move) {
         int y = move.getY();
         int x = move.getX();
         if (!checkMoveValidity(y, x) || isCellOccupied(y, x)) {

@@ -1,10 +1,12 @@
 package tictactoe;
 
+import tictactoe.controller.Controller;
+import tictactoe.view.Grid;
+
 import java.io.IOException;
 
 public class Game {
-    private final Grid grid = new Grid();
-    private final Controller controller = new Controller(grid);
+    private final Controller controller = new Controller();
 
     public Game() {
     }
@@ -17,6 +19,7 @@ public class Game {
                 break;
             }
 
+            Grid grid = controller.getGrid();
             grid.drawGrid();
 
             while (!controller.isFinished()) {

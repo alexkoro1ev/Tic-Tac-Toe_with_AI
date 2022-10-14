@@ -1,11 +1,16 @@
-package tictactoe;
+package tictactoe.mode;
+
+import tictactoe.mode.player.EasyMode;
+import tictactoe.mode.player.Human;
+import tictactoe.mode.player.MediumMode;
+import tictactoe.mode.player.Player;
+import tictactoe.util.Console;
+import tictactoe.controller.Controller;
 
 import java.io.IOException;
 
 public class Mode {
     Controller controller;
-    private final Player player1;
-    private final Player player2;
     private final boolean isGameWillBeStarted;
 
     public Mode(Controller controller) throws IOException {
@@ -14,13 +19,25 @@ public class Mode {
 
         this.isGameWillBeStarted = mode[0].equals("start");
         if (this.isGameWillBeStarted) {
-            this.player1 = mode[1].equals("user") ? new Human(controller) : new AI(controller);
-            this.player2 = mode[2].equals("user") ? new Human(controller) : new AI(controller);
+            Player firstPlayer = selectPlayer(mode[1]);
+            controller.setFirstPlayer(firstPlayer);
+            Player secondPlayer = selectPlayer(mode[2]);
+            controller.setSecondPlayer(secondPlayer);
         } else {
-            this.player1 = null;
-            this.player2 = null;
+            controller.setFirstPlayer(null);
+            controller.setSecondPlayer(null);
         }
 
+    }
+
+    private Player selectPlayer(String player) {
+        switch (player) {
+            case "easy" :
+                return new EasyMode(controller);
+            case "medium" :
+                return new MediumMode(controller);
+        }
+        return new Human(controller);
     }
 
     private String[] start() throws IOException {
@@ -52,15 +69,9 @@ public class Mode {
     }
 
     private boolean isEasyOrUser(String option) {
-        return option.equals("easy") || option.equals("user");
-    }
-
-    public Player getPlayer1() {
-        return player1;
-    }
-
-    public Player getPlayer2() {
-        return player2;
+        return option.equals("medium") ||
+                option.equals("easy") ||
+                option.equals("user");
     }
 
     public boolean isGameWillBeStarted() {

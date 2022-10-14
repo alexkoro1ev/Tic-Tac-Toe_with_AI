@@ -1,15 +1,22 @@
-package tictactoe;
+package tictactoe.controller;
+
+import tictactoe.mode.Mode;
+import tictactoe.mode.player.Player;
+import tictactoe.model.Cell;
+import tictactoe.util.Console;
+import tictactoe.view.Grid;
 
 import java.io.IOException;
 
 public class Controller {
-    private final Grid grid;
+    private Grid grid;
     private Mode mode;
+    private Player firstPlayer;
+    private Player secondPlayer;
     private boolean isFinished;
-    private int turnCounter = 0;
+    private int turnCounter;
 
-    public Controller(Grid grid) {
-        this.grid = grid;
+    public Controller() {
     }
 
 //    public void startGame() throws IOException {
@@ -24,16 +31,18 @@ public class Controller {
 //    }
 
     public void createNewGame() throws IOException {
+        this.grid = new Grid();
+        turnCounter = 0;
         this.mode = new Mode(this);
         this.isFinished = !this.mode.isGameWillBeStarted();
     }
 
     public void makeMoves() {
-        Move move;
+        Cell move;
         if (turnCounter % 2 == 0) {
-            move = mode.getPlayer1().makeMove();
+            move = firstPlayer.makeMove();
         } else {
-            move = mode.getPlayer2().makeMove();
+            move = secondPlayer.makeMove();
         }
 
         redrawGrid(move);
@@ -121,14 +130,14 @@ public class Controller {
 //        char currentCellLabel = grid.getCurrentGrid()[y][x];
 //        return currentCellLabel != ' ';
 //    }
+//
+//    private void updateGrid(Move move) {
+//        char[][] updatedGrid = grid.getCurrentGrid();
+//        updatedGrid[move.getY()][move.getX()] = move.getLabel();
+//        grid.setCurrentGrid(updatedGrid);
+//    }
 
-    private void updateGrid(Move move) {
-        char[][] updatedGrid = grid.getCurrentGrid();
-        updatedGrid[move.getY()][move.getX()] = move.getLabel();
-        grid.setCurrentGrid(updatedGrid);
-    }
-
-    private void redrawGrid(Move move) {
+    private void redrawGrid(Cell move) {
         grid.drawGrid(move);
     }
 
@@ -145,25 +154,25 @@ public class Controller {
     }
 
     private boolean checkWin() {
-        char[][] currentGrid = grid.getCurrentGrid();
+        Cell[][] currentGrid = grid.getCurrentGrid();
         char currentLabel = getLabel();
 
         for (int i = 0; i < 3; i++) {
-            if ((currentGrid[i][0] == currentLabel &&
-                    currentGrid[i][1] == currentLabel &&
-                    currentGrid[i][2] == currentLabel) ||
-                    (currentGrid[0][i] == currentLabel &&
-                            currentGrid[1][i] == currentLabel &&
-                            currentGrid[2][i] == currentLabel)) {
+            if ((currentGrid[i][0].getLabel() == currentLabel &&
+                    currentGrid[i][1].getLabel() == currentLabel &&
+                    currentGrid[i][2].getLabel() == currentLabel) ||
+                    (currentGrid[0][i].getLabel() == currentLabel &&
+                            currentGrid[1][i].getLabel() == currentLabel &&
+                            currentGrid[2][i].getLabel() == currentLabel)) {
                 return true;
             }
 
-            if (((currentGrid[0][0] == currentLabel &&
-                    currentGrid[1][1] == currentLabel &&
-                    currentGrid[2][2] == currentLabel) ||
-                    (currentGrid[0][2] == currentLabel &&
-                            currentGrid[1][1] == currentLabel &&
-                            currentGrid[2][0] == currentLabel))) {
+            if (((currentGrid[0][0].getLabel() == currentLabel &&
+                    currentGrid[1][1].getLabel() == currentLabel &&
+                    currentGrid[2][2].getLabel() == currentLabel) ||
+                    (currentGrid[0][2].getLabel() == currentLabel &&
+                            currentGrid[1][1].getLabel() == currentLabel &&
+                            currentGrid[2][0].getLabel() == currentLabel))) {
                 return true;
             }
         }
@@ -172,17 +181,25 @@ public class Controller {
     }
 
     private boolean checkDraw() {
-        char[][] currentGrid = grid.getCurrentGrid();
+        Cell[][] currentGrid = grid.getCurrentGrid();
 
-        for (char[] line : currentGrid) {
-            for (char c : line) {
-                if (c == ' ') {
+        for (Cell[] line : currentGrid) {
+            for (Cell cell : line) {
+                if (cell.getLabel() == ' ') {
                     return false;
                 }
             }
         }
 
         return true;
+    }
+
+    public void setFirstPlayer(Player firstPlayer) {
+        this.firstPlayer = firstPlayer;
+    }
+
+    public void setSecondPlayer(Player secondPlayer) {
+        this.secondPlayer = secondPlayer;
     }
 
     public Grid getGrid() {
