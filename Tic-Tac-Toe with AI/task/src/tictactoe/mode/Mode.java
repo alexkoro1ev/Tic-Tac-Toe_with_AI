@@ -1,9 +1,6 @@
 package tictactoe.mode;
 
-import tictactoe.mode.player.EasyMode;
-import tictactoe.mode.player.Human;
-import tictactoe.mode.player.MediumMode;
-import tictactoe.mode.player.Player;
+import tictactoe.mode.player.*;
 import tictactoe.util.Console;
 import tictactoe.controller.Controller;
 
@@ -32,10 +29,12 @@ public class Mode {
 
     private Player selectPlayer(String player) {
         switch (player) {
-            case "easy" :
+            case "easy":
                 return new EasyMode(controller);
-            case "medium" :
+            case "medium":
                 return new MediumMode(controller);
+            case "hard":
+                return new HardMode(controller);
         }
         return new Human(controller);
     }
@@ -53,6 +52,7 @@ public class Mode {
         return mode;
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean isCommandsValid(String[] mode) {
         if (mode.length == 1 && mode[0].equals("exit")) {
             return true;
@@ -69,11 +69,13 @@ public class Mode {
     }
 
     private boolean isEasyOrUser(String option) {
-        return option.equals("medium") ||
+        return option.equals("hard") ||
+                option.equals("medium") ||
                 option.equals("easy") ||
                 option.equals("user");
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isGameWillBeStarted() {
         return isGameWillBeStarted;
     }

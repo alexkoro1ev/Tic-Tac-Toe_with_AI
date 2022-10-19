@@ -10,7 +10,7 @@ public class Cell {
         this.y = y;
         this.x = x;
         this.label = label;
-        this.empty = true;
+        this.empty = (label == ' ');
     }
 
     public int getX() {

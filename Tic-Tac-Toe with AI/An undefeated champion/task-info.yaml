@@ -374,6 +374,805 @@ files:
         }
     }
   learner_created: false
+- name: src/tictactoe/util/Console.java
+  visible: true
+  text: |
+    package tictactoe.util;
+
+    import java.io.BufferedReader;
+    import java.io.IOException;
+    import java.io.InputStreamReader;
+    import java.util.Scanner;
+
+    public class Console {
+        private static final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+        public static String readLine() throws IOException {
+            return br.readLine();
+        }
+
+        public static void writeLine(String line) {
+            System.out.println(line);
+        }
+
+        public static void write(String line) {
+            System.out.print(line);
+        }
+    }
+  learner_created: true
+- name: src/tictactoe/mode/player/AI.java
+  visible: true
+  text: |
+    package tictactoe.mode.player;
+
+    import tictactoe.controller.Controller;
+    import tictactoe.model.Cell;
+
+    import java.util.Random;
+
+    public abstract class AI extends Player {
+        public AI(Controller controller) {
+            super(controller);
+        }
+
+        @Override
+        public abstract Cell makeMove();
+
+        protected Cell makeRandomMove() {
+            Random random = new Random();
+            Cell move;
+            while (true) {
+                int y = random.nextInt(3);
+                int x = random.nextInt(3);
+                char label = controller.getLabel();
+                move = new Cell(y, x, label);
+                if (moveIsNotValid(move)) {
+                    continue;
+                }
+
+                return move;
+            }
+        }
+
+        protected Cell lastMoveToWin(char label) {
+            Cell[][] currentGrid = controller.getGrid().getCurrentGrid();
+            int horizontalCheck = 0;
+            int verticalCheck = 0;
+            int mainDiagonalCheck = 0;
+            int sideDiagonalCheck = 0;
+            int[] horizontalEmptyCell = new int[]{-1, - 1};
+            int[] verticalEmptyCell = new int[]{-1, - 1};
+            int[] mainDiagonalEmptyCell = new int[]{-1, - 1};
+            int[] sideDiagonalEmptyCell = new int[]{-1, - 1};
+            Cell move;
+
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    // row check----------------------------
+                    if (currentGrid[i][j].getLabel() == label) {
+                        horizontalCheck++;
+                    } else if (currentGrid[i][j].isEmpty()) {
+                        horizontalEmptyCell[0] = i ;
+                        horizontalEmptyCell[1] = j;
+                    }
+                    if (j == 2 && horizontalCheck == 2 && horizontalEmptyCell[0] != -1) {
+                        return new Cell(horizontalEmptyCell[0], horizontalEmptyCell[1], label);
+                    }
+
+                    // column check-------------------------
+                    if (currentGrid[j][i].getLabel() == label) {
+                        verticalCheck++;
+                    } else if (currentGrid[j][i].isEmpty()) {
+                        verticalEmptyCell[0] = j;
+                        verticalEmptyCell[1] = i;
+                    }
+                    if (j == 2 && verticalCheck == 2 && verticalEmptyCell[0] != -1) {
+                        return new Cell(verticalEmptyCell[0], verticalEmptyCell[1], label);
+                    }
+
+                    // main diagonal check------------------
+                    if (currentGrid[j][j].getLabel() == label) {
+                        mainDiagonalCheck++;
+                    } else if (currentGrid[j][j].isEmpty()) {
+                        mainDiagonalEmptyCell[0] = j;
+                        mainDiagonalEmptyCell[1] = j;
+                    }
+                    if (j == 2 && mainDiagonalCheck == 2 && mainDiagonalEmptyCell[0] != -1) {
+                        return new Cell(mainDiagonalEmptyCell[0], mainDiagonalEmptyCell[1], label);
+                    }
+
+                    // side diagonal check------------------
+                    if (currentGrid[j][2 - j].getLabel() == label) {
+                        sideDiagonalCheck++;
+                    } else if (currentGrid[j][2 - j].isEmpty()) {
+                        sideDiagonalEmptyCell[0] = j;
+                        sideDiagonalEmptyCell[1] = 2 - j;
+                    }
+                    if (j == 2 && sideDiagonalCheck == 2 && sideDiagonalEmptyCell[0] != -1) {
+                        return new Cell(sideDiagonalEmptyCell[0], sideDiagonalEmptyCell[1], label);
+                    }
+
+                }
+                horizontalEmptyCell = new int[]{-1, - 1};
+                verticalEmptyCell = new int[]{-1, - 1};
+                mainDiagonalEmptyCell = new int[]{-1, - 1};
+                sideDiagonalEmptyCell = new int[]{-1, - 1};
+                horizontalCheck = 0;
+                verticalCheck = 0;
+                mainDiagonalCheck = 0;
+                sideDiagonalCheck = 0;
+            }
+
+            return new Cell(-1, -1, label);
+        }
+    }
+  learner_created: true
+- name: src/tictactoe/mode/player/EasyMode.java
+  visible: true
+  text: |
+    package tictactoe.mode.player;
+
+    import tictactoe.controller.Controller;
+    import tictactoe.model.Cell;
+    import tictactoe.util.Console;
+
+    public class EasyMode extends AI {
+        public EasyMode(Controller controller) {
+            super(controller);
+        }
+
+        @Override
+        public Cell makeMove() {
+            Console.writeLine("Making move level \"easy\"");
+            return makeRandomMove();
+        }
+    }
+  learner_created: true
+- name: src/tictactoe/mode/player/MediumMode.java
+  visible: true
+  text: |
+    package tictactoe.mode.player;
+
+    import tictactoe.controller.Controller;
+    import tictactoe.model.Cell;
+    import tictactoe.util.Console;
+
+    public class MediumMode extends AI {
+
+        public MediumMode(Controller controller) {
+            super(controller);
+        }
+
+        @Override
+        public Cell makeMove() {
+            char label = controller.getLabel();
+            char opponentsLabel = label == 'X' ? 'O' : 'X';
+            Console.writeLine("Making move level \"medium\"");
+            Cell move = lastMoveToWin(label);
+            if (move.getY() != -1) {
+                return move;
+            }
+            Cell nextOpponentsWinMove = lastMoveToWin(opponentsLabel);
+            if (nextOpponentsWinMove.getY() != -1) {
+                return new Cell(nextOpponentsWinMove.getY(), nextOpponentsWinMove.getX(), label);
+            }
+
+            return makeRandomMove();
+        }
+    }
+  learner_created: true
+- name: src/tictactoe/mode/Mode.java
+  visible: true
+  text: |
+    package tictactoe.mode;
+
+    import tictactoe.mode.player.EasyMode;
+    import tictactoe.mode.player.Human;
+    import tictactoe.mode.player.MediumMode;
+    import tictactoe.mode.player.Player;
+    import tictactoe.util.Console;
+    import tictactoe.controller.Controller;
+
+    import java.io.IOException;
+
+    public class Mode {
+        Controller controller;
+        private final boolean isGameWillBeStarted;
+
+        public Mode(Controller controller) throws IOException {
+            this.controller = controller;
+            String[] mode = start();
+
+            this.isGameWillBeStarted = mode[0].equals("start");
+            if (this.isGameWillBeStarted) {
+                Player firstPlayer = selectPlayer(mode[1]);
+                controller.setFirstPlayer(firstPlayer);
+                Player secondPlayer = selectPlayer(mode[2]);
+                controller.setSecondPlayer(secondPlayer);
+            } else {
+                controller.setFirstPlayer(null);
+                controller.setSecondPlayer(null);
+            }
+
+        }
+
+        private Player selectPlayer(String player) {
+            switch (player) {
+                case "easy" :
+                    return new EasyMode(controller);
+                case "medium" :
+                    return new MediumMode(controller);
+            }
+            return new Human(controller);
+        }
+
+        private String[] start() throws IOException {
+            Console.write("Input command: ");
+            String[] mode;
+            do {
+                mode = Console.readLine().split(" ");
+                if (!isCommandsValid(mode)) {
+                    Console.writeLine("Bad parameters!");
+                }
+            } while (!isCommandsValid(mode));
+
+            return mode;
+        }
+
+        private boolean isCommandsValid(String[] mode) {
+            if (mode.length == 1 && mode[0].equals("exit")) {
+                return true;
+            }
+
+            if (mode.length != 3) {
+                return false;
+            }
+            return isStartOrExit(mode[0]) && isEasyOrUser(mode[1]) && isEasyOrUser(mode[2]);
+        }
+
+        private boolean isStartOrExit(String command) {
+            return command.equals("start") || command.equals("exit");
+        }
+
+        private boolean isEasyOrUser(String option) {
+            return option.equals("medium") ||
+                    option.equals("easy") ||
+                    option.equals("user");
+        }
+
+        public boolean isGameWillBeStarted() {
+            return isGameWillBeStarted;
+        }
+    }
+  learner_created: true
+- name: src/tictactoe/Game.java
+  visible: true
+  text: |
+    package tictactoe;
+
+    import tictactoe.controller.Controller;
+    import tictactoe.view.Grid;
+
+    import java.io.IOException;
+
+    public class Game {
+        private final Controller controller = new Controller();
+
+        public Game() {
+        }
+
+        public void run() throws IOException {
+            while (true) {
+
+                controller.createNewGame();
+                if (!controller.getMode().isGameWillBeStarted()) {
+                    break;
+                }
+
+                Grid grid = controller.getGrid();
+                grid.drawGrid();
+
+                while (!controller.isFinished()) {
+                    controller.makeMoves();
+                }
+            }
+        }
+    }
+  learner_created: true
+- name: src/tictactoe/controller/Controller.java
+  visible: true
+  text: |
+    package tictactoe.controller;
+
+    import tictactoe.mode.Mode;
+    import tictactoe.mode.player.Player;
+    import tictactoe.model.Cell;
+    import tictactoe.util.Console;
+    import tictactoe.view.Grid;
+
+    import java.io.IOException;
+
+    public class Controller {
+        private Grid grid;
+        private Mode mode;
+        private Player firstPlayer;
+        private Player secondPlayer;
+        private boolean isFinished;
+        private int turnCounter;
+
+        public Controller() {
+        }
+
+    //    public void startGame() throws IOException {
+    //        Console.write("Enter the cells: ");
+    //        char[] state = Console.readLine().toCharArray();
+    //
+    //        for (int i = 0; i < state.length; i++) {
+    //            Move move = getMoveFromState(state[i], i);
+    //            updateGrid(move);
+    //        }
+    //        grid.drawGrid();
+    //    }
+
+        public void createNewGame() throws IOException {
+            this.grid = new Grid();
+            turnCounter = 0;
+            this.mode = new Mode(this);
+            this.isFinished = !this.mode.isGameWillBeStarted();
+        }
+
+        public void makeMoves() {
+            Cell move;
+            if (turnCounter % 2 == 0) {
+                move = firstPlayer.makeMove();
+            } else {
+                move = secondPlayer.makeMove();
+            }
+
+            redrawGrid(move);
+            getState();
+            turnCounter++;
+        }
+
+    //    private Move getMoveFromState(char c, int position) {
+    //        int y = position / 3;
+    //        int x = position % 3;
+    //
+    //        switch (c) {
+    //            case 'X':
+    //                turnCounter++;
+    //                return new Move('X', y, x);
+    //            case 'O':
+    //                turnCounter++;
+    //                return new Move('O', y, x);
+    //        }
+    //
+    //        return new Move(' ', y, x);
+    //
+    //    }
+    //
+    //    public void makeHumanMove() {
+    //        Move move = readMove();
+    //        redrawGrid(move);
+    //        getState();
+    //    }
+
+    //    public void makeAIMove() {
+    //        Console.writeLine("Making move level \"easy\"");
+    //        Random random = new Random();
+    //        Move move = null;
+    //        while (move == null) {
+    //            int y = random.nextInt(3);
+    //            int x = random.nextInt(3);
+    //            if(checkMoveValidity(y, x) && !isCellOccupied(y, x)) {
+    //                turnCounter++;
+    //                move = new Move(getLabel(), y, x);
+    //            }
+    //        }
+    //        redrawGrid(move);
+    //        getState();
+    //    }
+
+    //    private Move readMove() {
+    //        int y;
+    //        int x;
+    //        while (true) {
+    //            try {
+    //                Console.write("Enter the coordinates: ");
+    //                String coordinates = Console.readLine();
+    //                y = Integer.parseInt(String.valueOf(coordinates.charAt(0))) - 1;
+    //                x = Integer.parseInt(String.valueOf(coordinates.charAt(2))) - 1;
+    //            } catch (Exception e) {
+    //                Console.writeLine("You should enter numbers!");
+    //                continue;
+    //            }
+    //
+    //            if (!checkMoveValidity(y, x) || isCellOccupied(y, x)) {
+    //                if (!checkMoveValidity(y, x)) {
+    //                    Console.writeLine("Coordinates should be from 1 to 3!");
+    //                } else {
+    //                    Console.writeLine("This cell is occupied! Choose another one!");
+    //                }
+    //                continue;
+    //            }
+    //
+    //            turnCounter++;
+    //
+    //            return new Move(getLabel(), y, x);
+    //        }
+    //    }
+
+        public char getLabel() {
+            return turnCounter % 2 == 0 ? 'X' : 'O';
+        }
+
+    //    private boolean checkMoveValidity(int y, int x) {
+    //        return !(y < 0 || y > 2 || x < 0 || x > 2);
+    //    }
+    //
+    //    private boolean isCellOccupied(int y, int x) {
+    //        char currentCellLabel = grid.getCurrentGrid()[y][x];
+    //        return currentCellLabel != ' ';
+    //    }
+    //
+    //    private void updateGrid(Move move) {
+    //        char[][] updatedGrid = grid.getCurrentGrid();
+    //        updatedGrid[move.getY()][move.getX()] = move.getLabel();
+    //        grid.setCurrentGrid(updatedGrid);
+    //    }
+
+        private void redrawGrid(Cell move) {
+            grid.drawGrid(move);
+        }
+
+        private void getState() {
+            if (checkWin()) {
+                Console.writeLine(getLabel() + " wins");
+                isFinished = true;
+                return;
+            }
+            if (checkDraw()) {
+                Console.writeLine("Draw");
+                isFinished = true;
+            }
+        }
+
+        private boolean checkWin() {
+            Cell[][] currentGrid = grid.getCurrentGrid();
+            char currentLabel = getLabel();
+
+            for (int i = 0; i < 3; i++) {
+                if ((currentGrid[i][0].getLabel() == currentLabel &&
+                        currentGrid[i][1].getLabel() == currentLabel &&
+                        currentGrid[i][2].getLabel() == currentLabel) ||
+                        (currentGrid[0][i].getLabel() == currentLabel &&
+                                currentGrid[1][i].getLabel() == currentLabel &&
+                                currentGrid[2][i].getLabel() == currentLabel)) {
+                    return true;
+                }
+
+                if (((currentGrid[0][0].getLabel() == currentLabel &&
+                        currentGrid[1][1].getLabel() == currentLabel &&
+                        currentGrid[2][2].getLabel() == currentLabel) ||
+                        (currentGrid[0][2].getLabel() == currentLabel &&
+                                currentGrid[1][1].getLabel() == currentLabel &&
+                                currentGrid[2][0].getLabel() == currentLabel))) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private boolean checkDraw() {
+            Cell[][] currentGrid = grid.getCurrentGrid();
+
+            for (Cell[] line : currentGrid) {
+                for (Cell cell : line) {
+                    if (cell.getLabel() == ' ') {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public void setFirstPlayer(Player firstPlayer) {
+            this.firstPlayer = firstPlayer;
+        }
+
+        public void setSecondPlayer(Player secondPlayer) {
+            this.secondPlayer = secondPlayer;
+        }
+
+        public Grid getGrid() {
+            return grid;
+        }
+
+        public Mode getMode() {
+            return mode;
+        }
+
+        public boolean isFinished() {
+            return isFinished;
+        }
+    }
+  learner_created: true
+- name: src/tictactoe/view/Grid.java
+  visible: true
+  text: |
+    package tictactoe.view;
+
+    import tictactoe.model.Cell;
+    import tictactoe.util.Console;
+
+    public class Grid {
+        private Cell[][] currentGrid;
+
+        public Grid() {
+            currentGrid = new Cell[3][3];
+            for (int y = 0; y < 3; y++) {
+                for (int x = 0; x < 3; x++) {
+                    currentGrid[y][x] = new Cell(y, x, ' ');
+                }
+            }
+        }
+
+        public void drawGrid(Cell move) {
+            currentGrid[move.getY()][move.getX()].setLabel(move.getLabel());
+            drawGrid();
+        }
+
+        public void drawGrid() {
+            Console.writeLine("---------");
+            for (int y = 0; y < 3; y++) {
+                Console.write("| ");
+                for (int x = 0; x < 3; x++) {
+                    Console.write(currentGrid[y][x].getLabel() + " ");
+                }
+                Console.writeLine("|");
+            }
+            Console.writeLine("---------");
+        }
+
+        public Cell[][] getCurrentGrid() {
+            return currentGrid;
+        }
+
+        public void setCurrentGrid(Cell[][] currentGrid) {
+            this.currentGrid = currentGrid;
+        }
+    }
+  learner_created: true
+- name: src/tictactoe/mode/player/Human.java
+  visible: true
+  text: |
+    package tictactoe.mode.player;
+
+    import tictactoe.controller.Controller;
+    import tictactoe.model.Cell;
+    import tictactoe.util.Console;
+
+    public class Human extends Player {
+
+        public Human(Controller controller) {
+            super(controller);
+        }
+
+        @Override
+        public Cell makeMove() {
+            int y;
+            int x;
+            char label = controller.getLabel();
+     //       char opponentsLabel = label == 'X' ? 'O' : 'X';
+            while (true) {
+                try {
+    //                Cell last = lastMoveToWin(label);
+    //                if (last.getY() != -1) {
+    //                    Console.writeLine("Preferred: " + (last.getY() + 1) + " " + (last.getX() + 1));
+    //                }
+    //                Cell opponentsMoveForWinning = lastMoveToWin(opponentsLabel);
+    //                if (opponentsMoveForWinning.getY() != -1) {
+    //                    Console.writeLine("Opp is gonna win, if he moves at: " +
+    //                            (opponentsMoveForWinning.getY() + 1) + " " + (opponentsMoveForWinning.getX() + 1));
+    //                }
+
+                    Console.write("Enter the coordinates: ");
+                    String coordinates = Console.readLine();
+                    y = Integer.parseInt(String.valueOf(coordinates.charAt(0))) - 1;
+                    x = Integer.parseInt(String.valueOf(coordinates.charAt(2))) - 1;
+                } catch (Exception e) {
+                    Console.writeLine("You should enter numbers!");
+                    continue;
+                }
+
+                // inspection line
+
+
+                Cell move = new Cell(y, x, label);
+                if (moveIsNotValid(move)) {
+                    continue;
+                }
+
+                return move;
+            }
+        }
+
+        @Override
+        protected boolean moveIsNotValid(Cell move) {
+            int y = move.getY();
+            int x = move.getX();
+            if (!checkMoveValidity(y, x) || isCellOccupied(y, x)) {
+                if (!checkMoveValidity(y, x)) {
+                    Console.writeLine("Coordinates should be from 1 to 3!");
+                } else {
+                    Console.writeLine("This cell is occupied! Choose another one!");
+                }
+                return true;
+            }
+            return false;
+        }
+    }
+  learner_created: true
+- name: src/tictactoe/model/Cell.java
+  visible: true
+  text: |
+    package tictactoe.model;
+
+    public class Cell {
+        private final int x;
+        private final int y;
+        private char label;
+        private boolean empty;
+
+        public Cell(int y, int x, char label) {
+            this.y = y;
+            this.x = x;
+            this.label = label;
+            this.empty = true;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
+
+        public char getLabel() {
+            return label;
+        }
+
+        public void setLabel(char label) {
+            this.label = label;
+            this.empty = (label == ' ');
+        }
+
+        public boolean isEmpty() {
+            return empty;
+        }
+    }
+  learner_created: true
+- name: src/tictactoe/mode/player/Player.java
+  visible: true
+  text: |
+    package tictactoe.mode.player;
+
+    import tictactoe.controller.Controller;
+    import tictactoe.model.Cell;
+
+    public abstract class Player {
+
+        Controller controller;
+
+        public Player(Controller controller) {
+            this.controller = controller;
+        }
+
+        public abstract Cell makeMove();
+        boolean moveIsNotValid(Cell move) {
+            int y = move.getY();
+            int x = move.getX();
+            return !checkMoveValidity(y, x) || isCellOccupied(y, x);
+        }
+
+        protected boolean checkMoveValidity(int y, int x) {
+            return !(y < 0 || y > 2 || x < 0 || x > 2);
+        }
+
+        protected boolean isCellOccupied(int y, int x) {
+            Cell currentCellLabel = controller.getGrid().getCurrentGrid()[y][x];
+            return !currentCellLabel.isEmpty();
+        }
+
+
+        // utility method for checking last moves to win as user
+        // prints preferred move before the turn
+    //    protected Cell lastMoveToWin(char label) {
+    //        Cell[][] currentGrid = controller.getGrid().getCurrentGrid();
+    //        int horizontalCheck = 0;
+    //        int verticalCheck = 0;
+    //        int mainDiagonalCheck = 0;
+    //        int sideDiagonalCheck = 0;
+    //        int[] horizontalEmptyCell = new int[]{-1, - 1};
+    //        int[] verticalEmptyCell = new int[]{-1, - 1};
+    //        int[] mainDiagonalEmptyCell = new int[]{-1, - 1};
+    //        int[] sideDiagonalEmptyCell = new int[]{-1, - 1};
+    //        Cell move;
+    //
+    //        for (int i = 0; i < 3; i++) {
+    //            for (int j = 0; j < 3; j++) {
+    //                // row check----------------------------
+    //                if (currentGrid[i][j].getLabel() == label) {
+    //                    horizontalCheck++;
+    //                } else if (currentGrid[i][j].isEmpty()) {
+    //                    horizontalEmptyCell[0] = i ;
+    //                    horizontalEmptyCell[1] = j;
+    //                }
+    //                if (j == 2 && horizontalCheck == 2 && horizontalEmptyCell[0] != -1) {
+    //                    return new Cell(horizontalEmptyCell[0], horizontalEmptyCell[1], label);
+    //                }
+    //
+    //                // column check-------------------------
+    //                if (currentGrid[j][i].getLabel() == label) {
+    //                    verticalCheck++;
+    //                } else if (currentGrid[j][i].isEmpty()) {
+    //                    verticalEmptyCell[0] = j;
+    //                    verticalEmptyCell[1] = i;
+    //                }
+    //                if (j == 2 && verticalCheck == 2 && verticalEmptyCell[0] != -1) {
+    //                    return new Cell(verticalEmptyCell[0], verticalEmptyCell[1], label);
+    //                }
+    //
+    //                // main diagonal check------------------
+    //                if (currentGrid[j][j].getLabel() == label) {
+    //                    mainDiagonalCheck++;
+    //                } else if (currentGrid[j][j].isEmpty()) {
+    //                    mainDiagonalEmptyCell[0] = j;
+    //                    mainDiagonalEmptyCell[1] = j;
+    //                }
+    //                if (j == 2 && mainDiagonalCheck == 2 && mainDiagonalEmptyCell[0] != -1) {
+    //                    return new Cell(mainDiagonalEmptyCell[0], mainDiagonalEmptyCell[1], label);
+    //                }
+    //
+    //                // side diagonal check------------------
+    //                if (currentGrid[j][2 - j].getLabel() == label) {
+    //                    sideDiagonalCheck++;
+    //                } else if (currentGrid[j][2 - j].isEmpty()) {
+    //                    sideDiagonalEmptyCell[0] = j;
+    //                    sideDiagonalEmptyCell[1] = 2 - j;
+    //                }
+    //                if (j == 2 && sideDiagonalCheck == 2 && sideDiagonalEmptyCell[0] != -1) {
+    //                    return new Cell(sideDiagonalEmptyCell[0], sideDiagonalEmptyCell[1], label);
+    //                }
+    //
+    //            }
+    //            horizontalEmptyCell = new int[]{-1, - 1};
+    //            verticalEmptyCell = new int[]{-1, - 1};
+    //            mainDiagonalEmptyCell = new int[]{-1, - 1};
+    //            sideDiagonalEmptyCell = new int[]{-1, - 1};
+    //            horizontalCheck = 0;
+    //            verticalCheck = 0;
+    //            mainDiagonalCheck = 0;
+    //            sideDiagonalCheck = 0;
+    //        }
+    //
+    //        return new Cell(-1, -1, label);
+    //    }
+    }
+  learner_created: true
+- name: src/tictactoe/controller/Minimax.java
+  visible: true
+  learner_created: true
+- name: src/tictactoe/mode/player/HardMode.java
+  visible: true
+  learner_created: true
 feedback_link: https://hyperskill.org/learn/step/7438#comment
-status: Unchecked
+status: Solved
+feedback:
+  message: Well done! You've finished the project. Select a new project on <a href="https://hyperskill.org/projects">JetBrains
+    Academy</a> to continue learning.
+  time: Wed, 19 Oct 2022 06:58:17 UTC
 record: -1

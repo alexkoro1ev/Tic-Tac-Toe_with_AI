@@ -23,6 +23,17 @@
       <module name="Tic-Tac-Toe_with_AI.Topics-Random-Gaussian_random_numbers.main" target="11" />
       <module name="Tic-Tac-Toe_with_AI.Topics-Random-Generate_random_numbers.main" target="11" />
       <module name="Tic-Tac-Toe_with_AI.Topics-Random-Theory.main" target="11" />
+      <module name="Tic-Tac-Toe_with_AI.Topics-Recursion-About_recursion.main" target="11" />
+      <module name="Tic-Tac-Toe_with_AI.Topics-Recursion-Alternating_Fibonacci_numbers.main" target="11" />
+      <module name="Tic-Tac-Toe_with_AI.Topics-Recursion-Determine_results_of_calling_the_method.main" target="11" />
+      <module name="Tic-Tac-Toe_with_AI.Topics-Recursion-Find_a_substring.main" target="11" />
+      <module name="Tic-Tac-Toe_with_AI.Topics-Recursion-Fix_a_method_to_check_the_string_is_palindrome.main" target="11" />
+      <module name="Tic-Tac-Toe_with_AI.Topics-Recursion-K-combination.main" target="11" />
+      <module name="Tic-Tac-Toe_with_AI.Topics-Recursion-N-th_power.main" target="11" />
+      <module name="Tic-Tac-Toe_with_AI.Topics-Recursion-Number_of_decompositions.main" target="11" />
+      <module name="Tic-Tac-Toe_with_AI.Topics-Recursion-Obscure_method.main" target="11" />
+      <module name="Tic-Tac-Toe_with_AI.Topics-Recursion-Theory.main" target="11" />
+      <module name="Tic-Tac-Toe_with_AI.Topics-Recursion-Zeros_and_ones.main" target="11" />
       <module name="Tic-Tac-Toe_with_AI.util.main" target="11" />
     </bytecodeTargetLevel>
   </component>
